@@ -7,13 +7,27 @@ plugins {
     alias(libs.plugins.androidApplication)
     alias(libs.plugins.composeMultiplatform)
     alias(libs.plugins.composeCompiler)
+    id("app.cash.sqldelight") version "2.0.2"
+}
+
+sqldelight {
+    databases {
+        create("AppDatabase") {
+            packageName.set("com.expenseApp.db")
+        }
+    }
 }
 
 kotlin {
     androidTarget {
-        @OptIn(ExperimentalKotlinGradlePluginApi::class)
+        /*@OptIn(ExperimentalKotlinGradlePluginApi::class)
         compilerOptions {
             jvmTarget.set(JvmTarget.JVM_11)
+        }*/
+        compilations.all {
+            kotlinOptions {
+                jvmTarget = "11"
+            }
         }
     }
     
@@ -33,6 +47,12 @@ kotlin {
         androidMain.dependencies {
             implementation(compose.preview)
             implementation(libs.androidx.activity.compose)
+            // Koin
+            implementation(project.dependencies.platform("io.insert-koin:koin-bom:3.5.1"))
+            implementation("io.insert-koin:koin-core")
+            implementation("io.insert-koin:koin-android")
+            // SQLDelight
+            implementation(libs.android.driver)
         }
         commonMain.dependencies {
             implementation(compose.runtime)
@@ -46,22 +66,30 @@ kotlin {
             implementation(libs.androidx.lifecycle.runtime.compose)
             api(compose.materialIconsExtended)
 
-            //Navigation PreCompose
+            // Navigation PreCompose
             api("moe.tlaster:precompose:1.5.10")
+            // Viewmodel
             api("moe.tlaster:precompose-viewmodel:1.5.10")
+            // Koin
+            implementation(project.dependencies.platform("io.insert-koin:koin-bom:3.5.1"))
+            implementation("io.insert-koin:koin-core")
+            implementation("io.insert-koin:koin-compose")
+            api("moe.tlaster:precompose-koin:1.5.10")
         }
         iosMain.dependencies {
-
+            // SQLDelight
+            implementation(libs.native.driver)
+            implementation("co.touchlab:stately-common:2.0.5")
         }
     }
 }
 
 android {
-    namespace = "org.miniabastos.kotlinmultiplatformproject"
+    namespace = "org.miniabastos.kmproject"
     compileSdk = libs.versions.android.compileSdk.get().toInt()
 
     defaultConfig {
-        applicationId = "org.miniabastos.kotlinmultiplatformproject"
+        applicationId = "org.miniabastos.kmproject"
         minSdk = libs.versions.android.minSdk.get().toInt()
         targetSdk = libs.versions.android.targetSdk.get().toInt()
         versionCode = 1

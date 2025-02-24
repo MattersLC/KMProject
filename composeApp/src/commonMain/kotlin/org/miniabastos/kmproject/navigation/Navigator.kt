@@ -5,12 +5,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import moe.tlaster.precompose.koin.koinViewModel
 import moe.tlaster.precompose.navigation.NavHost
 import moe.tlaster.precompose.navigation.Navigator
 import moe.tlaster.precompose.navigation.path
-import moe.tlaster.precompose.viewmodel.viewModel
-import org.miniabastos.kmproject.data.ExpenseManager
-import org.miniabastos.kmproject.data.ExpenseRepoImplement
+import org.koin.core.parameter.parametersOf
 import org.miniabastos.kmproject.getColorsTheme
 import org.miniabastos.kmproject.presentacion.ExpensesViewModel
 import org.miniabastos.kmproject.ui.ExpensesDetailScreen
@@ -19,9 +18,7 @@ import org.miniabastos.kmproject.ui.ExpensesScreen
 @Composable
 fun Navigation(navigator: Navigator) {
     val colors = getColorsTheme()
-    val viewModel = viewModel(modelClass = ExpensesViewModel::class) {
-        ExpensesViewModel(ExpenseRepoImplement(ExpenseManager))
-    }
+    val viewModel = koinViewModel(ExpensesViewModel::class) { parametersOf() }
 
     NavHost(
         modifier = Modifier.background(colors.background),
