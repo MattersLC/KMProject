@@ -8,6 +8,7 @@ plugins {
     alias(libs.plugins.composeMultiplatform)
     alias(libs.plugins.composeCompiler)
     id("app.cash.sqldelight") version "2.0.2"
+    kotlin("plugin.serialization") version "1.9.22"
 }
 
 sqldelight {
@@ -53,6 +54,9 @@ kotlin {
             implementation("io.insert-koin:koin-android")
             // SQLDelight
             implementation(libs.android.driver)
+            // Ktor
+            implementation(libs.ktor.client.okhttp)
+            implementation(libs.kotlinx.coroutines.android)
         }
         commonMain.dependencies {
             implementation(compose.runtime)
@@ -75,11 +79,18 @@ kotlin {
             implementation("io.insert-koin:koin-core")
             implementation("io.insert-koin:koin-compose")
             api("moe.tlaster:precompose-koin:1.5.10")
+            // Ktor
+            implementation(libs.ktor.client.core)
+            implementation(libs.kotlinx.coroutines.core)
+            implementation(libs.ktor.content.negotiation)
+            implementation(libs.ktor.content.serialization)
         }
         iosMain.dependencies {
             // SQLDelight
             implementation(libs.native.driver)
             implementation("co.touchlab:stately-common:2.0.5")
+            // Ktor
+            implementation(libs.ktor.client.darwin)
         }
     }
 }

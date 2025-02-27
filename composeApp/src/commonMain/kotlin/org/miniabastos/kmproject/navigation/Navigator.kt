@@ -27,17 +27,21 @@ fun Navigation(navigator: Navigator) {
     ) {
         scene(route = "/home") {
             val uiState by viewModel.uiState.collectAsStateWithLifecycle()
-            ExpensesScreen(uiState) { expense ->
+            ExpensesScreen(uiState = uiState, onExpenseClick = { expense ->
                 navigator.navigate("/addExpenses/${expense.id}")
-
-            }
+            }, onDeleteExpense = { expenseToDelete ->
+                viewModel.deleteExpense(expenseToDelete.id)
+            })
         }
 
         scene(route = "/addExpenses/{id}?") { backStackEntry ->
             val idFromPath = backStackEntry.path<Long>("id")
             val expenseToEditOrAdd = idFromPath?.let { id -> viewModel.getExpenseWithId(id) }
 
-            ExpensesDetailScreen(expenseToEdit = expenseToEditOrAdd, categoryList = viewModel.getCategories()) { expense ->
+            ExpensesDetailScreen(
+                expenseToEdit = expenseToEditOrAdd,
+                categoryList = viewModel.getCategories()
+            ) { expense ->
                 if (expenseToEditOrAdd == null) {
                     viewModel.addExpense(expense)
                 } else {

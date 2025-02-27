@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -18,6 +19,8 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Button
 import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.Card
+import androidx.compose.material.CircularProgressIndicator
+import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
@@ -27,36 +30,83 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import org.miniabastos.kmproject.getColorsTheme
 import org.miniabastos.kmproject.models.Expense
 import org.miniabastos.kmproject.presentacion.ExpensesUiState
+import org.miniabastos.kmproject.utils.SwipeToDeleteContainer
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun ExpensesScreen(uiState: ExpensesUiState, onExpenseClick: (expense: Expense) -> Unit) {
+fun ExpensesScreen(
+    uiState: ExpensesUiState,
+    onExpenseClick: (expense: Expense) -> Unit,
+    onDeleteExpense: (expense: Expense) -> Unit
+) {
     val colors = getColorsTheme()
 
-    LazyColumn(
-        modifier = Modifier.padding(horizontal = 16.dp, vertical = 16.dp),
-        verticalArrangement = Arrangement.spacedBy(8.dp)
-    ) {
-        stickyHeader {
-            Column(
-                modifier = Modifier.background(colors.background)
+    when (uiState) {
+        is ExpensesUiState.Loading -> {
+            Box(
+                modifier = Modifier.fillMaxSize(),
+                contentAlignment = Alignment.Center
             ) {
-                // Composables
-                ExpensesTotalHeader(uiState.total)
-                AllExpensesHeader()
+                CircularProgressIndicator()
             }
         }
 
-        items(uiState.expenses) { expense ->
-            ExpensesItem(
-                expense = expense,
-                onExpenseClick = onExpenseClick
-            )
+        is ExpensesUiState.Success -> {
+            if (uiState.expenses.isEmpty()) {
+                Box(
+                    modifier = Modifier.fillMaxSize().padding(horizontal = 16.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        modifier = Modifier.fillMaxWidth(),
+                        textAlign = TextAlign.Center,
+                        style = MaterialTheme.typography.body1,
+                        text = "No expenses found, please add your first expense with the + symbol down below"
+                    )
+                }
+            } else {
+                LazyColumn(
+                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 16.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    stickyHeader {
+                        Column(
+                            modifier = Modifier.background(colors.background)
+                        ) {
+                            // Composables
+                            ExpensesTotalHeader(uiState.total)
+                            AllExpensesHeader()
+                        }
+                    }
+
+                    items(items = uiState.expenses, key = { it.id }) { expense ->
+                        SwipeToDeleteContainer(
+                            item = expense,
+                            onDelete = onDeleteExpense
+                        ) {
+                            ExpensesItem(expense = expense, onExpenseClick = onExpenseClick)
+                        }
+                    }
+                }
+            }
+        }
+
+        is ExpensesUiState.Error -> {
+            Box(
+                modifier = Modifier.fillMaxSize(),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    text = "Error: ${uiState.message}",
+                    style = MaterialTheme.typography.body1
+                )
+            }
         }
     }
 }
